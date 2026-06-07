@@ -166,11 +166,12 @@ a:hover, a:focus {
 
 .post-item-list .post-thumb {
   width: 260px !important;
-  height: 12rem !important; /* h-48 */
+  height: 12rem !important;
   padding-bottom: 0 !important;
   position: static !important;
   border-radius: 0.5rem !important;
   flex-shrink: 0;
+  order: 0;
 }
 
 .post-item-list .post-thumb a {
@@ -182,14 +183,6 @@ a:hover, a:focus {
   height: 100%;
   object-fit: cover;
   border-radius: 0.5rem;
-}
-
-@media (max-width: 767px) {
-  .post-item-list .post-thumb {
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 16 / 9;
-  }
 }
 
 .post-item-list .post-excerpt {
@@ -220,6 +213,37 @@ a:hover, a:focus {
   flex-direction: row-reverse;
 }
 
+/* 手机端列表模式：垂直堆叠，缩略图在上 */
+@media (max-width: 767px) {
+  .post-item-list {
+    flex-direction: column !important;
+    padding: 0 !important;
+  }
+
+  .post-item-list .post-thumb {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+    order: 0;
+  }
+
+  .post-item-list .post-thumb img {
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+
+  /* 让文字内容区域撑满宽度，内边距统一 */
+  .post-item-list > div:last-child {
+    padding: 1rem 1.25rem 1.25rem 1.25rem !important;
+    order: 1;
+  }
+
+  /* 手机端缩略图在右侧也要保持缩略图在上 */
+  .post-thumb-right.post-item-list {
+    flex-direction: column !important;
+  }
+}
+
 /* ----- 网格模式 ----- */
 .grid-layout .post-item-grid {
   display: flex !important;
@@ -228,11 +252,10 @@ a:hover, a:focus {
   height: 100% !important;
 }
 
-/* 网格模式：缩略图置顶（覆盖 md:flex-row 等） */
 .grid-layout .post-item-grid .post-thumb {
   width: 100% !important;
   height: 0 !important;
-  padding-bottom: 56.25% !important; /* 16:9 */
+  padding-bottom: 56.25% !important;
   position: relative !important;
   border-radius: 0 !important;
   overflow: hidden;
