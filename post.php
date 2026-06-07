@@ -95,6 +95,16 @@ function initToc() {
         a.href = '#' + heading.id;
         a.textContent = heading.innerText;
         a.className = 'block hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-1';
+        a.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.getElementById(heading.id);
+            if (!target) return;
+            const headerHeight = 72; // 导航栏高度 + 额外间距
+            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+            // 同时更新 URL hash
+            history.pushState(null, null, '#' + heading.id);
+        });
         
         li.appendChild(a);
         ul.appendChild(li);
