@@ -67,8 +67,8 @@ $this->need('header.php');
       <section id="posts">
         <div class="flex items-center justify-between mb-8">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white">所有文章</h2>
-          <!-- 布局切换按钮 -->
-          <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1" id="layout-toggle">
+          <!-- 布局切换按钮（仅电脑端显示） -->
+          <div class="hidden md:flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1" id="layout-toggle">
             <button type="button" data-layout="list" class="layout-btn p-2 rounded-md transition-colors" aria-label="列表视图" title="列表视图">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
@@ -119,7 +119,15 @@ $this->need('header.php');
 function initLayoutToggle() {
     var defaultLayout = '<?php echo isset($this->options->postLayout) ? $this->options->postLayout : "list"; ?>';
     var savedLayout = localStorage.getItem('post-layout');
-    var currentLayout = savedLayout || defaultLayout;
+    var isMobile = window.innerWidth < 768;
+
+    // 手机端强制网格，电脑端跟随设置/本地存储
+    var currentLayout;
+    if (isMobile) {
+        currentLayout = 'grid';
+    } else {
+        currentLayout = savedLayout || defaultLayout;
+    }
 
     var toggleEl = document.getElementById('layout-toggle');
     if (!toggleEl) return;
