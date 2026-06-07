@@ -251,6 +251,14 @@
   });
 </script>
 
+<!-- PJAX Loading 遮罩 -->
+<div id="pjax-loading" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm">
+  <div class="flex flex-col items-center gap-4">
+    <div class="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
+    <span class="text-sm font-medium text-gray-600 dark:text-gray-300">加载中...</span>
+  </div>
+</div>
+
 <!-- 引入 PJAX 和 NProgress -->
 <script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
@@ -258,6 +266,22 @@
 <script>
 // PJAX 初始化
 (function() {
+    var loadingEl = document.getElementById('pjax-loading');
+
+    function showLoading() {
+        if (loadingEl) {
+            loadingEl.classList.remove('hidden');
+            loadingEl.classList.add('flex');
+        }
+    }
+
+    function hideLoading() {
+        if (loadingEl) {
+            loadingEl.classList.add('hidden');
+            loadingEl.classList.remove('flex');
+        }
+    }
+
     var pjax = new Pjax({
         selectors: [
             'head title',
@@ -276,10 +300,12 @@
 
     document.addEventListener('pjax:send', function() {
         NProgress.start();
+        showLoading();
     });
 
     document.addEventListener('pjax:complete', function() {
         NProgress.done();
+        hideLoading();
         // 重新初始化页面组件
         if (typeof setupMobileMenu === 'function') setupMobileMenu();
         if (typeof setupFloatingControls === 'function') setupFloatingControls();
