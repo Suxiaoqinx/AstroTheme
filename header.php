@@ -54,7 +54,7 @@
     <?php $this->header(); ?>
 </head>
 <body class="flex flex-col min-h-screen bg-gray-50 text-gray-900 antialiased transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100">
-<header class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
+<header id="site-header" class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
   <nav class="max-w-[120rem] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
     <div class="flex items-center gap-4">
       <a href="<?php $this->options->siteUrl(); ?>" class="flex items-center gap-2 text-xl font-bold hover:opacity-80 transition-opacity">

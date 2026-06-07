@@ -286,6 +286,7 @@
         selectors: [
             'head title',
             'meta[name="description"]',
+            'header',
             '#mobile-drawer-portal',
             'main',
             'footer',
