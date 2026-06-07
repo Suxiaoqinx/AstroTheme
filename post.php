@@ -59,7 +59,8 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+// TOC 目录生成函数（全局可访问，供 PJAX 回调调用）
+function initToc() {
     const content = document.getElementById('post-content');
     const tocContainer = document.getElementById('toc-container');
     if (!content || !tocContainer) return;
@@ -99,15 +100,20 @@ document.addEventListener('DOMContentLoaded', function() {
         ul.appendChild(li);
     });
     
+    tocContainer.innerHTML = '';
     tocContainer.appendChild(ul);
     
     // Smooth scroll and highlight active
+    if (window._tocObserver) {
+        window._tocObserver.disconnect();
+    }
+    
     const observerOptions = {
         rootMargin: '-80px 0px -40% 0px',
         threshold: 1.0
     };
     
-    const observer = new IntersectionObserver((entries) => {
+    window._tocObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const id = entry.target.id;
@@ -121,8 +127,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, observerOptions);
     
-    headings.forEach(h => observer.observe(h));
-});
+    headings.forEach(h => window._tocObserver.observe(h));
+}
+
+document.addEventListener('DOMContentLoaded', initToc);
+document.addEventListener('pjax:complete', initToc);
 </script>
 
 <script src="<?php $this->options->themeUrl('joe.short.js'); ?>"></script>

@@ -1,7 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const contentElements = document.querySelectorAll('.prose'); // 获取所有文章/页面内容区域
+function initJoeShortCode() {
+    const contentElements = document.querySelectorAll('.prose');
 
     contentElements.forEach(contentEl => {
+        // 如果已经处理过（有 data-processed 标记），跳过
+        if (contentEl.dataset.shortProcessed) return;
+        contentEl.dataset.shortProcessed = 'true';
+
         let html = contentEl.innerHTML;
 
         // 预处理：移除可能被 Markdown 自动包裹的 <p> 标签，防止 HTML 嵌套不合法导致错位
@@ -94,7 +98,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         contentEl.innerHTML = html;
     });
-});
+}
+
+document.addEventListener('DOMContentLoaded', initJoeShortCode);
+document.addEventListener('pjax:complete', initJoeShortCode);
 
 // 暴露全局切换函数给 Tabs 使用
 window.joeSwitchTab = function(btn, targetId, groupId) {

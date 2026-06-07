@@ -29,7 +29,8 @@ $this->need('header.php');
             </div>
       
       <script>
-      document.addEventListener('DOMContentLoaded', function() {
+      // 相册初始化函数（全局可访问，供 PJAX 回调调用）
+      function initGallery() {
           const content = document.getElementById('gallery-content');
           const container = document.getElementById('gallery-container');
           const grid = document.getElementById('gallery-grid');
@@ -167,7 +168,10 @@ $this->need('header.php');
               container.appendChild(header);
               container.appendChild(imagesGrid);
           }
-      });
+      }
+      
+      document.addEventListener('DOMContentLoaded', initGallery);
+      document.addEventListener('pjax:complete', initGallery);
       </script>
     </div>
 
