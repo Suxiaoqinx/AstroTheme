@@ -71,6 +71,9 @@ function initToc() {
         return;
     }
 
+    // 先清空旧内容
+    tocContainer.innerHTML = '';
+    
     const ul = document.createElement('ul');
     ul.className = 'space-y-2';
     
@@ -92,18 +95,19 @@ function initToc() {
         li.style.paddingLeft = indent + 'rem';
         
         const a = document.createElement('a');
-        a.href = '#' + heading.id;
+        const targetId = heading.id; // 闭包保存 ID
+        a.href = '#' + targetId;
         a.textContent = heading.innerText;
         a.className = 'block hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-1';
         a.addEventListener('click', function(e) {
             e.preventDefault();
-            const target = document.getElementById(heading.id);
+            const target = document.getElementById(targetId);
             if (!target) return;
             const headerHeight = 72; // 导航栏高度 + 额外间距
             const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
             window.scrollTo({ top: targetPosition, behavior: 'smooth' });
             // 同时更新 URL hash
-            history.pushState(null, null, '#' + heading.id);
+            history.pushState(null, null, '#' + targetId);
         });
         
         li.appendChild(a);
@@ -116,28 +120,37 @@ function initToc() {
     // Smooth scroll and highlight active
     if (window._tocObserver) {
         window._tocObserver.disconnect();
+        window._tocObserver = null;
+    }
+    if (window._tocScrollHandler) {
+        window.removeEventListener('scroll', window._tocScrollHandler, { passive: true });
     }
     
-    const observerOptions = {
-        rootMargin: '-80px 0px -40% 0px',
-        threshold: 1.0
-    };
+    const tocLinks = document.querySelectorAll('#toc-container a');
+    const headerOffset = 100;
     
-    window._tocObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.id;
-                document.querySelectorAll('#toc-container a').forEach(link => {
-                    link.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-bold');
-                    if (link.getAttribute('href') === '#' + id) {
-                        link.classList.add('text-blue-600', 'dark:text-blue-400', 'font-bold');
-                    }
-                });
+    function updateTocHighlight() {
+        let currentId = null;
+        for (let i = headings.length - 1; i >= 0; i--) {
+            if (headings[i].getBoundingClientRect().top <= headerOffset) {
+                currentId = headings[i].id;
+                break;
             }
+        }
+        tocLinks.forEach(link => {
+            link.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-bold');
         });
-    }, observerOptions);
+        if (currentId) {
+            const activeLink = document.querySelector('#toc-container a[href="#' + currentId + '"]');
+            if (activeLink) {
+                activeLink.classList.add('text-blue-600', 'dark:text-blue-400', 'font-bold');
+            }
+        }
+    }
     
-    headings.forEach(h => window._tocObserver.observe(h));
+    window._tocScrollHandler = updateTocHighlight;
+    window.addEventListener('scroll', updateTocHighlight, { passive: true });
+    updateTocHighlight();
 }
 
 document.addEventListener('DOMContentLoaded', initToc);

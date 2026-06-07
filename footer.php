@@ -307,7 +307,9 @@
     document.addEventListener('pjax:complete', function() {
         NProgress.done();
         hideLoading();
-        // 重新初始化页面组件
+        // 先滚动到顶部
+        window.scrollTo(0, 0);
+        // 再重新初始化页面组件
         if (typeof setupMobileMenu === 'function') setupMobileMenu();
         if (typeof setupFloatingControls === 'function') setupFloatingControls();
         if (typeof initFancybox === 'function') initFancybox();
