@@ -208,9 +208,9 @@ a:hover, a:focus {
   display: inline-flex;
 }
 
-/* 缩略图在右侧（列表模式） */
+/* 缩略图在右侧（列表模式）- 用更高优先级覆盖 row */
 .post-thumb-right.post-item-list {
-  flex-direction: row-reverse;
+  flex-direction: row-reverse !important;
 }
 
 /* 手机端列表模式：垂直堆叠，缩略图在上 */
