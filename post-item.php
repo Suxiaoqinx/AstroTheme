@@ -2,13 +2,12 @@
 <?php
 $imgUrl = getPostImg($this);
 $thumbPos = $this->fields->thumbPosition ? $this->fields->thumbPosition : 'left';
-$flexDir = $thumbPos === 'right' ? 'md:flex-row-reverse' : 'md:flex-row';
 
 global $stickyArray;
 if (!isset($stickyArray)) $stickyArray = [];
 $isSticky = isset($this->isStickyItem) && $this->isStickyItem;
 ?>
-<article class="post-item post-item-list bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow border border-gray-200 dark:border-gray-700 p-4 sm:p-6 flex flex-col <?php echo $flexDir; ?> gap-4 sm:gap-6 md:flex-row">
+<article class="post-item post-item-list bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow border border-gray-200 dark:border-gray-700 p-4 sm:p-6 flex flex-col md:flex-row gap-4 sm:gap-6 <?php echo $thumbPos === 'right' ? 'post-thumb-right' : ''; ?>">
   <?php if($imgUrl): ?>
   <div class="w-full md:w-[260px] lg:w-[320px] aspect-[16/9] md:aspect-auto md:h-48 overflow-hidden rounded-lg flex-shrink-0 post-thumb">
     <a href="<?php $this->permalink() ?>" class="block w-full h-full">
@@ -22,7 +21,7 @@ $isSticky = isset($this->isStickyItem) && $this->isStickyItem;
       <a href="<?php $this->permalink() ?>" class="block group">
         <h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors mb-2 sm:mb-3 flex items-center gap-2 flex-wrap leading-snug post-title">
           <?php if($isSticky): ?>
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">置顶</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 sticky-badge">置顶</span>
           <?php endif; ?>
           <?php $this->title() ?>
         </h3>

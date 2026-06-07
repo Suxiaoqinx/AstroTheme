@@ -156,51 +156,94 @@ a:hover, a:focus {
    文章列表布局切换样式
    ============================================ */
 
-/* 列表模式 (默认) */
+/* ----- 列表模式 ----- */
 .post-item-list {
-  display: flex;
-  flex-direction: row;
+  display: flex !important;
+  flex-direction: row !important;
+  padding: 1rem 1.5rem !important;
+  height: auto !important;
 }
 
 .post-item-list .post-thumb {
-  width: 260px;
-  height: auto;
-  aspect-ratio: auto;
+  width: 260px !important;
+  height: 12rem !important; /* h-48 */
+  padding-bottom: 0 !important;
+  position: static !important;
+  border-radius: 0.5rem !important;
+  flex-shrink: 0;
+}
+
+.post-item-list .post-thumb a {
+  position: static !important;
+}
+
+.post-item-list .post-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
 }
 
 @media (max-width: 767px) {
   .post-item-list .post-thumb {
-    width: 100%;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9;
   }
 }
 
 .post-item-list .post-excerpt {
   -webkit-line-clamp: 3;
   line-clamp: 3;
+  font-size: inherit;
+  padding: 0 !important;
 }
 
-/* 网格模式 */
+.post-item-list .post-title {
+  font-size: inherit !important;
+  line-height: inherit !important;
+  padding: 0 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.post-item-list .post-meta {
+  padding: 0 !important;
+  margin-top: auto;
+}
+
+.post-item-list .sticky-badge {
+  display: inline-flex;
+}
+
+/* 缩略图在右侧（列表模式） */
+.post-thumb-right.post-item-list {
+  flex-direction: row-reverse;
+}
+
+/* ----- 网格模式 ----- */
 .grid-layout .post-item-grid {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  height: 100% !important;
 }
 
+/* 网格模式：缩略图置顶（覆盖 md:flex-row 等） */
 .grid-layout .post-item-grid .post-thumb {
-  width: 100%;
-  height: 0;
-  padding-bottom: 56.25%; /* 16:9 */
-  position: relative;
-  border-radius: 0;
+  width: 100% !important;
+  height: 0 !important;
+  padding-bottom: 56.25% !important; /* 16:9 */
+  position: relative !important;
+  border-radius: 0 !important;
   overflow: hidden;
   flex-shrink: 0;
+  order: 0;
 }
 
 .grid-layout .post-item-grid .post-thumb a {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
   width: 100%;
   height: 100%;
 }
@@ -209,25 +252,41 @@ a:hover, a:focus {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 0;
+}
+
+.grid-layout .post-item-grid > div:last-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 0;
 }
 
 .grid-layout .post-item-grid .post-title {
-  font-size: 1rem;
-  line-height: 1.4;
-  margin-bottom: 0.5rem;
-  padding: 1rem 1rem 0 1rem;
+  font-size: 1rem !important;
+  line-height: 1.4 !important;
+  padding: 1rem 1rem 0 1rem !important;
+  margin-bottom: 0.5rem !important;
+  order: 0;
 }
 
 .grid-layout .post-item-grid .post-excerpt {
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  font-size: 0.875rem;
-  padding: 0 1rem;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  font-size: 0.875rem !important;
+  padding: 0 1rem !important;
+  order: 1;
 }
 
 .grid-layout .post-item-grid .post-meta {
-  padding: 0.75rem 1rem 1rem 1rem;
+  padding: 0.75rem 1rem 1rem 1rem !important;
   margin-top: auto;
+  order: 2;
+}
+
+.grid-layout .post-item-grid .sticky-badge {
+  display: inline-flex;
 }
 
 /* 跑马灯动画 */
