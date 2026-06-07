@@ -134,14 +134,12 @@
       updateUI();
     }
   }
-  document.addEventListener('DOMContentLoaded', setupFloatingControls);
 
   // 回复弹窗相关逻辑
   function showReplyForm(coid, authorName) {
     var respond = document.querySelector('.respond');
     if (!respond) return;
     respond.classList.remove('hidden');
-    // 提取纯数字 coid (去掉 "comment-" 前缀)
     var numericCoid = coid.toString().replace('comment-', '');
     document.getElementById('comment-parent').value = numericCoid;
     var replyInfo = document.getElementById('reply-to-info');
@@ -161,55 +159,134 @@
     document.getElementById('comment-parent').value = '0';
     document.getElementById('reply-to-info').classList.add('hidden');
   }
-  
-  // Fancybox 初始化
-  document.addEventListener('DOMContentLoaded', function() {
-      // 获取所有文章正文中的图片
-      const images = document.querySelectorAll('.prose img');
-      images.forEach(img => {
-          // 如果图片已经被 a 标签包裹，且 a 标签没有 data-fancybox 属性，则跳过或处理
-          const parent = img.parentElement;
-          if (parent.tagName === 'A') {
-              parent.setAttribute('data-fancybox', 'gallery');
-          } else {
-              // 用 a 标签包裹图片
-              const wrapper = document.createElement('a');
-              wrapper.href = img.src;
-              wrapper.setAttribute('data-fancybox', 'gallery');
-              wrapper.setAttribute('data-caption', img.alt || '');
-              
-              // 替换 DOM
-              img.parentNode.insertBefore(wrapper, img);
-              wrapper.appendChild(img);
-          }
-      });
-      
-      // 绑定 Fancybox
-      if (typeof Fancybox !== "undefined") {
-          Fancybox.bind('[data-fancybox]', {
-              // Fancybox v5 的配置选项
-              Hash: false,
-              Thumbs: {
-                  autoStart: false
-              },
-              Toolbar: {
-                  display: {
-                      left: ["infobar"],
-                      middle: [
-                          "zoomIn",
-                          "zoomOut",
-                          "toggle1to1",
-                          "rotateCCW",
-                          "rotateCW",
-                          "flipX",
-                          "flipY",
-                      ],
-                      right: ["slideshow", "thumbs", "close"],
-                  }
-              }
-          });
+
+  // 目录高亮初始化函数
+  function initTocHighlight() {
+    const tocLinks = document.querySelectorAll('#toc a');
+    if (!tocLinks.length) return;
+
+    const headings = [];
+    tocLinks.forEach(link => {
+      const id = link.getAttribute('href').replace('#', '');
+      const heading = document.getElementById(id);
+      if (heading) headings.push({ el: heading, link: link });
+    });
+
+    if (!headings.length) return;
+
+    function updateActive() {
+      let current = null;
+      for (let i = headings.length - 1; i >= 0; i--) {
+        if (headings[i].el.getBoundingClientRect().top <= 100) {
+          current = headings[i];
+          break;
+        }
       }
+      tocLinks.forEach(link => link.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-semibold'));
+      if (current) {
+        current.link.classList.add('text-blue-600', 'dark:text-blue-400', 'font-semibold');
+      }
+    }
+
+    window.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+  }
+
+  // Fancybox 初始化/重新初始化函数（全局可访问）
+  window.initFancybox = function() {
+    // 清理已有的 Fancybox 实例
+    document.querySelectorAll('a[data-fancybox]').forEach(a => {
+      if (a._fancyboxInstance) {
+        try { a._fancyboxInstance.destroy(); } catch(e) {}
+      }
+      a.removeAttribute('data-fancybox');
+      a.removeAttribute('data-caption');
+      // 如果是我们包裹的 a 标签且里面只有一个 img，解开包装
+      const img = a.querySelector('img');
+      if (img && a.children.length === 1 && img.tagName === 'IMG') {
+        a.parentNode.insertBefore(img, a);
+        a.parentNode.removeChild(a);
+      }
+    });
+
+    const images = document.querySelectorAll('.prose img');
+    images.forEach(img => {
+      const parent = img.parentElement;
+      if (parent.tagName === 'A' && parent.getAttribute('data-fancybox')) {
+        return;
+      }
+      if (parent.tagName === 'A') {
+        parent.setAttribute('data-fancybox', 'gallery');
+      } else {
+        const wrapper = document.createElement('a');
+        wrapper.href = img.src;
+        wrapper.setAttribute('data-fancybox', 'gallery');
+        wrapper.setAttribute('data-caption', img.alt || '');
+        img.parentNode.insertBefore(wrapper, img);
+        wrapper.appendChild(img);
+      }
+    });
+
+    if (typeof Fancybox !== "undefined") {
+      Fancybox.bind('[data-fancybox]', {
+        Hash: false,
+        Thumbs: { autoStart: false },
+        Toolbar: {
+          display: {
+            left: ["infobar"],
+            middle: ["zoomIn", "zoomOut", "toggle1to1", "rotateCCW", "rotateCW", "flipX", "flipY"],
+            right: ["slideshow", "thumbs", "close"]
+          }
+        }
+      });
+    }
+  };
+
+  // 页面加载完成后初始化所有组件
+  document.addEventListener('DOMContentLoaded', function() {
+    setupMobileMenu();
+    setupFloatingControls();
+    initFancybox();
+    initTocHighlight();
   });
+</script>
+
+<!-- 引入 PJAX 和 NProgress -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+
+<script>
+// PJAX 初始化
+(function() {
+    var pjax = new Pjax({
+        selectors: [
+            'head title',
+            'meta[name="description"]',
+            '#mobile-drawer-portal',
+            'main',
+            'footer',
+            '.fixed.bottom-8'
+        ],
+        cacheBust: false,
+        debug: false
+    });
+
+    // NProgress 配置
+    NProgress.configure({ showSpinner: false, trickleSpeed: 200 });
+
+    document.addEventListener('pjax:send', function() {
+        NProgress.start();
+    });
+
+    document.addEventListener('pjax:complete', function() {
+        NProgress.done();
+        // 重新初始化页面组件
+        if (typeof setupMobileMenu === 'function') setupMobileMenu();
+        if (typeof setupFloatingControls === 'function') setupFloatingControls();
+        if (typeof initFancybox === 'function') initFancybox();
+        if (typeof initTocHighlight === 'function') initTocHighlight();
+    });
+})();
 </script>
 
 <!-- 引入 Fancybox JS -->

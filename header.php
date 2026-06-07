@@ -199,7 +199,6 @@
 
     btn.dataset.initialized = 'true';
   }
-  document.addEventListener('DOMContentLoaded', setupMobileMenu);
 </script>
 
 <main class="flex-grow max-w-[120rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
