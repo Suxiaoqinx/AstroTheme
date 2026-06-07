@@ -1,0 +1,153 @@
+/**
+ * 基于 Astro-blog 修改的 Typecho 主题
+ * 
+ * @package AstroTheme
+ * @author 苏晓晴
+ * @version 1.0
+ * @link http://www.toubiec.cn
+ */
+
+/* Tailwind styles are loaded via CDN in header.php */
+html {
+  scroll-behavior: smooth;
+}
+body {
+  background-color: #f9fafb;
+  color: #111827;
+  transition: background-color 0.3s, color 0.3s;
+}
+.dark body {
+  background-color: #030712;
+  color: #f3f4f6;
+}
+
+/* 评论和文章分页样式 */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 0;
+  list-style: none;
+}
+.pagination li {
+  display: inline-flex;
+}
+.pagination li a, .pagination li span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border-radius: 0.5rem;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+.dark .pagination li a, .dark .pagination li span {
+  background-color: #1f2937;
+  color: #d1d5db;
+}
+.pagination li a:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+.dark .pagination li a:hover {
+  background-color: #374151;
+  color: #f9fafb;
+}
+.pagination li.active a, .pagination li.active span {
+  background-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
+}
+.dark .pagination li.active a, .dark .pagination li.active span {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* 全局链接样式：默认无下划线，悬停时显示下划线，便于可访问性与交互提示 */
+a {
+  text-decoration: none;
+}
+
+a:hover, a:focus {
+  text-decoration: underline;
+}
+
+/* 确保 typography (prose) 内的链接也遵循相同规则 */
+.prose a {
+  text-decoration: none;
+}
+.prose a:hover, .prose a:focus {
+  text-decoration: underline;
+}
+
+/* 修复文章/评论内容在小屏或容器内溢出的问题 */
+.prose, .post-content, .entry-content, .article-content, .comment-content {
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+}
+
+/* 图片自适应，避免超出容器 */
+.prose img, .post-content img, .entry-content img, .comment-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 代码块与 inline code 换行并允许横向滚动 */
+.prose pre, .post-content pre, .entry-content pre, pre {
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  max-width: 100%;
+}
+.prose code, .post-content code, .entry-content code, code {
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* 表格容器在小屏幕允许横向滚动 */
+.prose table, .post-content table, .entry-content table {
+  width: 100%;
+  display: table;
+}
+.table-responsive {
+  width: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 补充通用换行类（主题中可能使用） */
+.break-words {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* 说说页面的独立评论框架样式 */
+.moments #comments {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1rem 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.moments #comments .comment-body {
+  background: transparent;
+  padding: 0;
+  margin-bottom: 0;
+}
