@@ -1,26 +1,20 @@
 <?php
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
-// 注册插件：通过插件接口自动处理短代码
-Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('AstroTheme_Plugin', 'contentEx');
-Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = array('AstroTheme_Plugin', 'excerptEx');
-
+// 短代码处理 - 通过内容过滤钩子自动处理
 class AstroTheme_Plugin {
     public static function contentEx($content, $widget, $lastResult) {
         $content = empty($lastResult) ? $content : $lastResult;
-        if ($widget instanceof Widget_Archive) {
-            $content = parseContentShortcode($content, $widget);
-        }
-        return $content;
+        return parseContentShortcode($content, $widget);
     }
     public static function excerptEx($content, $widget, $lastResult) {
         $content = empty($lastResult) ? $content : $lastResult;
-        if ($widget instanceof Widget_Archive) {
-            $content = parseContentShortcode($content, $widget);
-        }
-        return $content;
+        return parseContentShortcode($content, $widget);
     }
 }
+Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = array('AstroTheme_Plugin', 'contentEx');
+Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = array('AstroTheme_Plugin', 'excerptEx');
+Typecho_Plugin::factory('Widget_Abstract_Comments')->contentEx = array('AstroTheme_Plugin', 'contentEx');
 
 function themeConfig($form) {
     // === 导航设置 ===
@@ -118,77 +112,74 @@ function themeInit($archive) {
     }
 }
 
-// 短代码处理 - 登录可见、评论可见等
+// 短代码处理 - 使用 { } 花括号语法（避免被 Markdown 解析）
 function parseContentShortcode($content, $archive = null) {
-    // === [login] 登录可见 [/login] ===
-    $content = preg_replace_callback(
-        '/\[login\]([\s\S]*?)\[\/login\]/i',
-        function($matches) {
-            $user = Typecho_Widget::widget('Widget_User');
-            if ($user->hasLogin()) {
-                return '<div class="my-4 p-4 rounded-xl border border-blue-200 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-800/50"><div class="flex items-center gap-2 mb-2"><svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg><span class="text-sm font-medium text-blue-600 dark:text-blue-400">登录可见内容</span></div><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">' . $matches[1] . '</div></div>';
-            }
-            return '<div class="my-4 p-4 rounded-xl border border-yellow-200 bg-yellow-50/50 dark:bg-yellow-900/20 dark:border-yellow-800/50 text-center"><svg class="w-8 h-8 text-yellow-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><p class="text-sm text-yellow-700 dark:text-yellow-300">🔒 此部分内容需要 <a href="' . Typecho_Widget::widget('Widget_Options')->loginUrl() . '" class="font-medium underline hover:text-yellow-900 dark:hover:text-yellow-100">登录</a> 后才能查看</p></div>';
-        },
-        $content
-    );
+    $login = Typecho_Widget::widget('Widget_User')->hasLogin();
 
-    // === [reply] 评论可见 [/reply] ===
-    $content = preg_replace_callback(
-        '/\[reply\]([\s\S]*?)\[\/reply\]/i',
-        function($matches) use ($archive) {
-            if ($archive && $archive->is('single') && $archive->cid) {
+    // === {login} 登录可见 {/login} ===
+    if (strpos($content, '{login}') !== false) {
+        if ($login) {
+            $content = strtr($content, array(
+                '{login}' => '<div class="my-4 p-4 rounded-xl border border-blue-200 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-800/50"><div class="flex items-center gap-2 mb-2"><svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg><span class="text-sm font-medium text-blue-600 dark:text-blue-400">登录可见内容</span></div><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">',
+                '{/login}' => '</div></div>',
+            ));
+        } else {
+            $loginUrl = Typecho_Widget::widget('Widget_Options')->loginUrl();
+            $content = preg_replace('/{login}[\s\S]*?{\/login}/', '<div class="my-4 p-4 rounded-xl border border-yellow-200 bg-yellow-50/50 dark:bg-yellow-900/20 dark:border-yellow-800/50 text-center"><svg class="w-8 h-8 text-yellow-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><p class="text-sm text-yellow-700 dark:text-yellow-300">🔒 此部分内容需要 <a href="' . $loginUrl . '" class="font-medium underline hover:text-yellow-900 dark:hover:text-yellow-100">登录</a> 后才能查看</p></div>', $content);
+        }
+    }
+
+    // === {reply} 评论可见 {/reply} ===
+    if (strpos($content, '{reply}') !== false) {
+        $hasComment = false;
+        if ($archive && $archive->is('single') && $archive->cid) {
+            if ($login) {
                 $user = Typecho_Widget::widget('Widget_User');
-                // 管理员和作者直接可见
-                if ($user->hasLogin() && ($user->group === 'administrator' || $user->uid === $archive->authorId)) {
-                    return '<div class="my-4 p-4 rounded-xl border border-green-200 bg-green-50/50 dark:bg-green-900/20 dark:border-green-800/50"><div class="flex items-center gap-2 mb-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class="text-sm font-medium text-green-600 dark:text-green-400">评论可见内容</span></div><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">' . $matches[1] . '</div></div>';
-                }
-                // 检查用户是否在此文章下留过言
-                $db = Typecho_Db::get();
-                $prefix = $db->getPrefix();
-                $hasComment = false;
-                if ($user->hasLogin()) {
+                if ($user->group === 'administrator' || $user->uid === $archive->authorId) {
+                    $hasComment = true;
+                } else {
+                    $db = Typecho_Db::get();
                     $result = $db->fetchRow($db->select()->from('table.comments')
                         ->where('cid = ?', $archive->cid)
                         ->where('authorId = ?', $user->uid)
                         ->where('status = ?', 'approved')
                         ->limit(1));
                     $hasComment = !empty($result);
-                } else {
-                    // 游客通过邮箱判断
-                    $cookieEmail = Typecho_Cookie::get('__typecho_remember_mail');
-                    if ($cookieEmail) {
-                        $result = $db->fetchRow($db->select()->from('table.comments')
-                            ->where('cid = ?', $archive->cid)
-                            ->where('mail = ?', $cookieEmail)
-                            ->where('status = ?', 'approved')
-                            ->limit(1));
-                        $hasComment = !empty($result);
-                    }
                 }
-                if ($hasComment) {
-                    return '<div class="my-4 p-4 rounded-xl border border-green-200 bg-green-50/50 dark:bg-green-900/20 dark:border-green-800/50"><div class="flex items-center gap-2 mb-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class="text-sm font-medium text-green-600 dark:text-green-400">评论可见内容</span></div><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">' . $matches[1] . '</div></div>';
+            } else {
+                $cookieEmail = Typecho_Cookie::get('__typecho_remember_mail');
+                if ($cookieEmail) {
+                    $db = Typecho_Db::get();
+                    $result = $db->fetchRow($db->select()->from('table.comments')
+                        ->where('cid = ?', $archive->cid)
+                        ->where('mail = ?', $cookieEmail)
+                        ->where('status = ?', 'approved')
+                        ->limit(1));
+                    $hasComment = !empty($result);
                 }
-                return '<div class="my-4 p-4 rounded-xl border border-yellow-200 bg-yellow-50/50 dark:bg-yellow-900/20 dark:border-yellow-800/50 text-center"><svg class="w-8 h-8 text-yellow-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg><p class="text-sm text-yellow-700 dark:text-yellow-300">💬 此部分内容需要 <a href="#comments" class="font-medium underline hover:text-yellow-900 dark:hover:text-yellow-100">发表评论</a> 后才能查看</p></div>';
             }
-            return '<div class="my-4 p-4 rounded-xl border border-yellow-200 bg-yellow-50/50 dark:bg-yellow-900/20 dark:border-yellow-800/50 text-center"><p class="text-sm text-yellow-700 dark:text-yellow-300"> 此内容仅在当前文章页面有效</p></div>';
-        },
-        $content
-    );
+        }
+        if ($hasComment) {
+            $content = strtr($content, array(
+                '{reply}' => '<div class="my-4 p-4 rounded-xl border border-green-200 bg-green-50/50 dark:bg-green-900/20 dark:border-green-800/50"><div class="flex items-center gap-2 mb-2"><svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class="text-sm font-medium text-green-600 dark:text-green-400">评论可见内容</span></div><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">',
+                '{/reply}' => '</div></div>',
+            ));
+        } else {
+            $content = preg_replace('/{reply}[\s\S]*?{\/reply}/', '<div class="my-4 p-4 rounded-xl border border-yellow-200 bg-yellow-50/50 dark:bg-yellow-900/20 dark:border-yellow-800/50 text-center"><svg class="w-8 h-8 text-yellow-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg><p class="text-sm text-yellow-700 dark:text-yellow-300">💬 此部分内容需要 <a href="#comments" class="font-medium underline hover:text-yellow-900 dark:hover:text-yellow-100">发表评论</a> 后才能查看</p></div>', $content);
+        }
+    }
 
-    // === [todo] 待办列表 [/todo] ===
-    $content = preg_replace_callback(
-        '/\[todo\]([\s\S]*?)\[\/todo\]/i',
-        function($matches) {
+    // === {todo} 待办列表 {/todo} ===
+    if (strpos($content, '{todo}') !== false) {
+        $content = preg_replace_callback('/{todo}([\s\S]*?){\/todo}/', function($matches) {
             $items = preg_split('/\n/', trim($matches[1]));
             $html = '<div class="my-4 p-4 rounded-xl border border-purple-200 bg-purple-50/50 dark:bg-purple-900/20 dark:border-purple-800/50"><div class="flex items-center gap-2 mb-3"><svg class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg><span class="text-sm font-bold text-purple-600 dark:text-purple-400">待办清单</span></div><ul class="space-y-2 todo-list">';
             foreach ($items as $item) {
                 $item = trim($item);
                 if (empty($item)) continue;
-                // 支持 [x] 和 [ ] 语法
-                if (preg_match('/^\[x\]\s*(.*)/i', $item, $m)) {
+                if (preg_match('/^\{x\}\s*(.*)/', $item, $m)) {
                     $html .= '<li class="flex items-start gap-2 text-sm"><input type="checkbox" checked disabled class="mt-1 w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-500"><span class="text-gray-500 dark:text-gray-400 line-through flex-1">' . htmlspecialchars($m[1]) . '</span></li>';
-                } elseif (preg_match('/^\[\s*\]\s*(.*)/', $item, $m)) {
+                } elseif (preg_match('/^\{\s*\}\s*(.*)/', $item, $m)) {
                     $html .= '<li class="flex items-start gap-2 text-sm"><input type="checkbox" disabled class="mt-1 w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"><span class="text-gray-700 dark:text-gray-300 flex-1">' . htmlspecialchars($m[1]) . '</span></li>';
                 } else {
                     $html .= '<li class="flex items-start gap-2 text-sm"><input type="checkbox" disabled class="mt-1 w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"><span class="text-gray-700 dark:text-gray-300 flex-1">' . htmlspecialchars($item) . '</span></li>';
@@ -196,33 +187,49 @@ function parseContentShortcode($content, $archive = null) {
             }
             $html .= '</ul></div>';
             return $html;
-        },
-        $content
-    );
+        }, $content);
+    }
 
-    // === [timeline] 时间线 [/timeline] ===
-    $content = preg_replace_callback(
-        '/\[timeline\]([\s\S]*?)\[\/timeline\]/i',
-        function($matches) {
-            $items = preg_split('/\n/', trim($matches[1]));
-            $html = '<div class="my-6 timeline"><div class="border-l-2 border-blue-200 dark:border-blue-800/50 ml-4 space-y-6">';
-            foreach ($items as $item) {
-                $item = trim($item);
-                if (empty($item)) continue;
-                // 支持 title="标题" content="内容" 或 纯文本
-                if (preg_match('/\[item\s+title=(?:"|\'|&quot;)(.*?)(?:"|\'|&quot;)\]([\s\S]*?)\[\/item\]/i', $item, $m)) {
-                    $html .= '<div class="relative pl-6"><div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-white dark:border-gray-800 shadow-sm"></div><h4 class="text-base font-bold text-gray-900 dark:text-white mb-1">' . htmlspecialchars($m[1]) . '</h4><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">' . $m[2] . '</div></div>';
-                } elseif (preg_match('/\[item date=(?:"|\'|&quot;)(.*?)(?:"|\'|&quot;)\]([\s\S]*?)\[\/item\]/i', $item, $m)) {
-                    $html .= '<div class="relative pl-6"><div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-white dark:border-gray-800 shadow-sm"></div><div class="text-xs text-blue-500 dark:text-blue-400 font-medium mb-1">' . htmlspecialchars($m[1]) . '</div><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">' . $m[2] . '</div></div>';
+    // === {timeline} 时间线 {/timeline} ===
+    if (strpos($content, '{timeline}') !== false) {
+        $content = preg_replace_callback('/{timeline}([\s\S]*?){\/timeline}/', function($matches) {
+            $html = '<div class="my-6"><div class="border-l-2 border-blue-200 dark:border-blue-800/50 ml-4 space-y-6">';
+            // 匹配 {item title="xxx"}内容{/item} 或 {item date="xxx"}内容{/item}
+            $content_inner = $matches[1];
+            $pos = 0;
+            while (preg_match('/{item\s+title="(.*?)"}/', $content_inner, $m, PREG_OFFSET_CAPTURE, $pos)) {
+                $title = $m[1][0];
+                $start = $m[0][1] + strlen($m[0][0]);
+                if (preg_match('/{\/item}/', $content_inner, $end_m, PREG_OFFSET_CAPTURE, $start)) {
+                    $body = substr($content_inner, $start, $end_m[0][1] - $start);
+                    $pos = $end_m[0][1] + strlen($end_m[0][0]);
+                    $html .= '<div class="relative pl-6"><div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-white dark:border-gray-800 shadow-sm"></div><h4 class="text-base font-bold text-gray-900 dark:text-white mb-1">' . htmlspecialchars($title) . '</h4><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">' . $body . '</div></div>';
                 } else {
-                    $html .= '<div class="relative pl-6"><div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-white dark:border-gray-800 shadow-sm"></div><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">' . htmlspecialchars($item) . '</div></div>';
+                    break;
+                }
+            }
+            // 如果没有匹配到 item 标签，则作为纯文本行处理
+            if (strpos($html, 'pl-6') === false) {
+                $lines = preg_split('/\n/', trim($matches[1]));
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if (empty($line)) continue;
+                    $html .= '<div class="relative pl-6"><div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500 border-2 border-white dark:border-gray-800 shadow-sm"></div><div class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">' . htmlspecialchars($line) . '</div></div>';
                 }
             }
             $html .= '</div></div>';
             return $html;
-        },
-        $content
-    );
+        }, $content);
+    }
+
+    // === {collapse title="xxx"} 折叠框 {/collapse} ===
+    if (strpos($content, '{collapse') !== false) {
+        $content = preg_replace_callback('/{collapse\s+title="(.*?)"}([\s\S]*?){\/collapse}/', function($matches) {
+            $uid = 'collapse-' . substr(md5($matches[1] . mt_rand()), 0, 8);
+            $body = '<div id="' . $uid . '" class="hidden mt-3 pl-4 text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-l-2 border-gray-200 dark:border-gray-700">' . $matches[2] . '</div>';
+            return '<div class="my-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"><button onclick="document.getElementById(\'' . $uid . '\').classList.toggle(\'hidden\')" class="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"><span class="text-sm font-medium text-gray-900 dark:text-white">' . htmlspecialchars($matches[1]) . '</span><svg class="w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>' . $body . '</div>';
+        }, $content);
+    }
 
     return $content;
 }
