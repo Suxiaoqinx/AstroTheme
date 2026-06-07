@@ -65,8 +65,19 @@ $this->need('header.php');
       </div>
 
       <section id="posts">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">所有文章</h2>
-        <div class="flex flex-col gap-8" id="post-list">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white">所有文章</h2>
+          <!-- 布局切换按钮 -->
+          <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1" id="layout-toggle">
+            <button type="button" data-layout="list" class="layout-btn p-2 rounded-md transition-colors" aria-label="列表视图" title="列表视图">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <button type="button" data-layout="grid" class="layout-btn p-2 rounded-md transition-colors" aria-label="网格视图" title="网格视图">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-8 grid-layout grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 hidden" id="post-list">
           <?php
           global $stickyArray;
           $stickyCids = $this->options->stickyCids;
@@ -102,4 +113,65 @@ $this->need('header.php');
     <!-- Sidebar -->
     <?php $this->need('sidebar.php'); ?>
 </div>
+
+<script>
+// 文章列表布局切换（全局可访问，供 PJAX 回调调用）
+function initLayoutToggle() {
+    var defaultLayout = '<?php echo isset($this->options->postLayout) ? $this->options->postLayout : "list"; ?>';
+    var savedLayout = localStorage.getItem('post-layout');
+    var currentLayout = savedLayout || defaultLayout;
+
+    var toggleEl = document.getElementById('layout-toggle');
+    if (!toggleEl) return;
+
+    var listContainer = document.getElementById('post-list');
+    var buttons = toggleEl.querySelectorAll('.layout-btn');
+
+    function applyLayout(layout) {
+        if (!listContainer) return;
+        if (layout === 'grid') {
+            listContainer.classList.remove('hidden');
+            listContainer.classList.add('grid-layout', 'grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+            listContainer.classList.remove('flex', 'flex-col', 'gap-8');
+        } else {
+            listContainer.classList.remove('hidden', 'grid-layout', 'grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+            listContainer.classList.add('flex', 'flex-col', 'gap-8');
+        }
+        buttons.forEach(function(btn) {
+            var btnLayout = btn.getAttribute('data-layout');
+            if (btnLayout === layout) {
+                btn.classList.add('bg-white', 'dark:bg-gray-600', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+                btn.classList.remove('text-gray-500', 'dark:text-gray-400');
+            } else {
+                btn.classList.remove('bg-white', 'dark:bg-gray-600', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+                btn.classList.add('text-gray-500', 'dark:text-gray-400');
+            }
+        });
+        // 更新文章卡片样式
+        document.querySelectorAll('.post-item').forEach(function(card) {
+            if (layout === 'grid') {
+                card.classList.add('post-item-grid');
+                card.classList.remove('post-item-list');
+            } else {
+                card.classList.remove('post-item-grid');
+                card.classList.add('post-item-list');
+            }
+        });
+    }
+
+    buttons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var layout = btn.getAttribute('data-layout');
+            localStorage.setItem('post-layout', layout);
+            applyLayout(layout);
+        });
+    });
+
+    applyLayout(currentLayout);
+}
+
+document.addEventListener('DOMContentLoaded', initLayoutToggle);
+document.addEventListener('pjax:complete', initLayoutToggle);
+</script>
+
 <?php $this->need('footer.php'); ?>

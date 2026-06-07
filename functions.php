@@ -21,6 +21,11 @@ function themeConfig($form) {
     $form->addInput($defaultThumb);
     $customPageSize = new \Typecho\Widget\Helper\Form\Element\Text('customPageSize', null, '10', _t('【首页设置】每页文章数目'), _t('设置首页和分类归档页每页显示的文章数量，默认 10。'));
     $form->addInput($customPageSize);
+    $postLayout = new \Typecho\Widget\Helper\Form\Element\Radio('postLayout', array(
+        'list' => _t('列表'),
+        'grid' => _t('网格')
+    ), 'list', _t('【首页设置】文章列表默认样式'), _t('设置文章列表的默认显示样式，默认列表模式。访客可通过页面右上角按钮切换，选择会保存到本地。'));
+    $form->addInput($postLayout);
 
     // === 侧边栏设置 ===
     $sidebarNickname = new \Typecho\Widget\Helper\Form\Element\Text('sidebarNickname', null, null, _t('【侧边栏设置】昵称'), _t('侧边栏个人信息卡片显示的昵称，如果不填则默认显示网站标题'));
