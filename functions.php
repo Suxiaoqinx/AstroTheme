@@ -114,6 +114,10 @@ function themeInit($archive) {
 
 // 短代码处理 - 使用 { } 花括号语法（避免被 Markdown 解析）
 function parseContentShortcode($content, $archive = null) {
+    // 确保 $content 是字符串
+    if ($content === null || !is_string($content)) {
+        return '';
+    }
     $login = Typecho_Widget::widget('Widget_User')->hasLogin();
 
     // === {login} 登录可见 {/login} ===
