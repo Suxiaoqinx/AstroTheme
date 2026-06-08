@@ -65,13 +65,8 @@ $this->need('header.php');
       </div>
 
       <section id="posts">
-        <!-- 排序按钮 -->
         <div class="flex items-center justify-between mb-8">
-          <div class="flex items-center gap-2 flex-wrap" id="sort-buttons">
-            <button type="button" data-sort="latest" class="sort-btn px-4 py-2 text-sm font-medium rounded-full transition-colors bg-blue-600 text-white shadow-sm">最新发布</button>
-            <button type="button" data-sort="views" class="sort-btn px-4 py-2 text-sm font-medium rounded-full transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">最多浏览</button>
-            <button type="button" data-sort="comments" class="sort-btn px-4 py-2 text-sm font-medium rounded-full transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">最多评论</button>
-          </div>
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white">所有文章</h2>
           <!-- 布局切换按钮（仅电脑端显示） -->
           <div class="hidden md:flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1" id="layout-toggle">
             <button type="button" data-layout="list" class="layout-btn p-2 rounded-md transition-colors" aria-label="列表视图" title="列表视图">
@@ -120,57 +115,6 @@ $this->need('header.php');
 </div>
 
 <script>
-// 排序按钮切换
-function initSortButtons() {
-    var sortContainer = document.getElementById('sort-buttons');
-    if (!sortContainer) return;
-
-    var buttons = sortContainer.querySelectorAll('.sort-btn');
-    
-    // 从 localStorage 读取上次选择的排序方式
-    var savedSort = localStorage.getItem('post-sort') || 'latest';
-    
-    // 更新按钮样式
-    buttons.forEach(function(btn) {
-        var btnSort = btn.getAttribute('data-sort');
-        if (btnSort === savedSort) {
-            btn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
-            btn.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
-        } else {
-            btn.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
-            btn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
-        }
-    });
-
-    buttons.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var sort = btn.getAttribute('data-sort');
-            localStorage.setItem('post-sort', sort);
-            // 更新按钮样式
-            buttons.forEach(function(b) {
-                b.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
-                b.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
-            });
-            btn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
-            btn.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
-            
-            // 根据排序方式跳转
-            var url = window.location.pathname;
-            switch(sort) {
-                case 'latest':
-                    window.location.href = '<?php echo $this->options->siteUrl(); ?>';
-                    break;
-                case 'views':
-                    window.location.href = url + '?sort=views';
-                    break;
-                case 'comments':
-                    window.location.href = url + '?sort=comments';
-                    break;
-            }
-        });
-    });
-}
-
 // 文章列表布局切换（全局可访问，供 PJAX 回调调用）
 function initLayoutToggle() {
     var defaultLayout = '<?php echo isset($this->options->postLayout) ? $this->options->postLayout : "list"; ?>';
@@ -234,10 +178,8 @@ function initLayoutToggle() {
     applyLayout(currentLayout);
 }
 
-document.addEventListener('DOMContentLoaded', initSortButtons);
 document.addEventListener('DOMContentLoaded', initLayoutToggle);
 document.addEventListener('pjax:complete', initLayoutToggle);
-document.addEventListener('pjax:complete', initSortButtons);
 </script>
 
 <?php $this->need('footer.php'); ?>

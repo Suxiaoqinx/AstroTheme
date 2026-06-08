@@ -48,6 +48,60 @@
       </article>
     </div>
 
+    <!-- Tags -->
+    <?php if ($this->tags): ?>
+    <div class="flex flex-wrap gap-2">
+      <?php $this->tags(' ', true, '暂无标签'); ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Copyright Notice -->
+    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-5 flex items-start gap-3">
+      <svg class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+      <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+        <p><strong class="text-blue-700 dark:text-blue-400">版权声明：</strong></p>
+        <p>本文作者：<span class="text-blue-600 dark:text-blue-400 font-medium"><?php $this->author(); ?></span></p>
+        <p>本文链接：<a href="<?php $this->permalink(); ?>" class="text-blue-600 dark:text-blue-400 hover:underline break-all"><?php $this->permalink(); ?></a></p>
+        <p>转载需注明文章出处，若本站内容侵犯了原著者的合法权益，请联系站长删除。</p>
+      </div>
+    </div>
+
+    <!-- Previous/Next Navigation -->
+    <?php
+    $prev = $this->thePrev;
+    $next = $this->theNext;
+    $prevContent = '';
+    $nextContent = '';
+    ob_start();
+    $this->thePrev('%s', '', '<span class="flex items-center gap-2 text-gray-500 dark:text-gray-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>上一篇</span><span class="font-medium text-gray-900 dark:text-white line-clamp-1">%s</span>');
+    $prevContent = ob_get_clean();
+    ob_start();
+    $this->theNext('%s', '', '<span class="font-medium text-gray-900 dark:text-white line-clamp-1">%s</span><span class="flex items-center gap-2 text-gray-500 dark:text-gray-400">下一篇<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></span>');
+    $nextContent = ob_get_clean();
+    ?>
+    <?php if ($prev || $next): ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <?php if ($prev): ?>
+      <a href="<?php $this->thePrev('%s'); ?>" class="group flex flex-col gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all">
+        <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          上一篇
+        </span>
+        <span class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2"><?php $this->thePrev('%s'); ?></span>
+      </a>
+      <?php endif; ?>
+      <?php if ($next): ?>
+      <a href="<?php $this->theNext('%s'); ?>" class="group flex flex-col gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all md:ml-auto">
+        <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 md:flex-row-reverse">
+          下一篇
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </span>
+        <span class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 md:text-right"><?php $this->theNext('%s'); ?></span>
+      </a>
+      <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <!-- Comments -->
     <?php if ($this->allow('comment')): ?>
         <?php $this->need('comments.php'); ?>

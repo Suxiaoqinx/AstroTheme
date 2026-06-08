@@ -92,22 +92,12 @@ function getPostImg($archive) {
     return false;
 }
 
-/**
- * 首页排序支持：通过 URL 参数 ?sort=views/comments 排序文章列表
- */
+// 拦截查询，设置每页文章数目
 function themeInit($archive) {
-    if ($archive->is('index') && isset($_GET['sort'])) {
-        $sort = $_GET['sort'];
-        if ($sort === 'views' || $sort === 'comments') {
-            $options = \Widget\Options::alloc();
-            $pageSize = $options->customPageSize ? intval($options->customPageSize) : 10;
-            $archive->parameter->pageSize = $pageSize;
-            
-            $field = ($sort === 'views') ? 'views' : 'commentsNum';
-            
-            // Typecho Widget_Archive 通过 sort 和 direction 参数控制排序
-            $archive->parameter->sort = $field;
-            $archive->parameter->direction = Typecho_Db::SORT_DESC;
+    if ($archive->is('index') || $archive->is('archive')) {
+        $pageSize = \Widget\Options::alloc()->customPageSize;
+        if ($pageSize) {
+            $archive->parameter->pageSize = intval($pageSize);
         }
     }
 }
