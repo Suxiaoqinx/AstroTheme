@@ -92,12 +92,32 @@ function getPostImg($archive) {
     return false;
 }
 
-// 拦截查询，设置每页文章数目
+/**
+ * 首页排序支持：通过 URL 参数 ?sort=views/comments 排序文章列表
+ */
 function themeInit($archive) {
-    if ($archive->is('index') || $archive->is('archive')) {
-        $pageSize = \Widget\Options::alloc()->customPageSize;
-        if ($pageSize) {
-            $archive->parameter->pageSize = intval($pageSize);
+    if ($archive->is('index') && isset($_GET['sort'])) {
+        $sort = $_GET['sort'];
+        if ($sort === 'views' || $sort === 'comments') {
+            $archive->parameter->pageSize = $archive->options->customPageSize ? $archive->options->customPageSize : 10;
+            $archive->setCustomParameter('pageSize', $archive->parameter->pageSize);
+            
+            $db = Typecho_Db::get();
+            $prefix = $db->getPrefix();
+            $offset = ($archive->_currentPage - 1) * $archive->parameter->pageSize;
+            
+            $field = ($sort === 'views') ? 'views' : 'commentsNum';
+            
+            $select = $db->select()
+                ->from('table.contents')
+                ->where('table.contents.status = ?', 'publish')
+                ->where('table.contents.type = ?', 'post')
+                ->where('table.contents.created <= ?', time())
+                ->order($field, Typecho_Db::SORT_DESC)
+                ->limit($archive->parameter->pageSize)
+                ->offset($offset);
+            
+            $archive->setCustomSql($select);
         }
     }
 }
