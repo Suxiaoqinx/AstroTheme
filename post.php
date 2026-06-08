@@ -67,40 +67,10 @@
     </div>
 
     <!-- Previous/Next Navigation -->
-    <?php
-    $prev = $this->thePrev;
-    $next = $this->theNext;
-    $prevContent = '';
-    $nextContent = '';
-    ob_start();
-    $this->thePrev('%s', '', '<span class="flex items-center gap-2 text-gray-500 dark:text-gray-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>上一篇</span><span class="font-medium text-gray-900 dark:text-white line-clamp-1">%s</span>');
-    $prevContent = ob_get_clean();
-    ob_start();
-    $this->theNext('%s', '', '<span class="font-medium text-gray-900 dark:text-white line-clamp-1">%s</span><span class="flex items-center gap-2 text-gray-500 dark:text-gray-400">下一篇<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></span>');
-    $nextContent = ob_get_clean();
-    ?>
-    <?php if ($prev || $next): ?>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <?php if ($prev): ?>
-      <a href="<?php $this->thePrev('%s'); ?>" class="group flex flex-col gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all">
-        <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-          上一篇
-        </span>
-        <span class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2"><?php $this->thePrev('%s'); ?></span>
-      </a>
-      <?php endif; ?>
-      <?php if ($next): ?>
-      <a href="<?php $this->theNext('%s'); ?>" class="group flex flex-col gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all md:ml-auto">
-        <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 md:flex-row-reverse">
-          下一篇
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-        </span>
-        <span class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 md:text-right"><?php $this->theNext('%s'); ?></span>
-      </a>
-      <?php endif; ?>
+      <?php $this->thePrev('<a href="%s" class="group flex flex-col gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all"><span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>上一篇</span><span class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">%s</span></a>', ''); ?>
+      <?php $this->theNext('<a href="%s" class="group flex flex-col gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all"><span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 md:flex-row-reverse">下一篇<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></span><span class="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 md:text-right">%s</span></a>', ''); ?>
     </div>
-    <?php endif; ?>
 
     <!-- Comments -->
     <?php if ($this->allow('comment')): ?>
