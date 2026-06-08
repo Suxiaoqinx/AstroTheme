@@ -99,25 +99,15 @@ function themeInit($archive) {
     if ($archive->is('index') && isset($_GET['sort'])) {
         $sort = $_GET['sort'];
         if ($sort === 'views' || $sort === 'comments') {
-            $archive->parameter->pageSize = $archive->options->customPageSize ? $archive->options->customPageSize : 10;
-            $archive->setCustomParameter('pageSize', $archive->parameter->pageSize);
-            
-            $db = Typecho_Db::get();
-            $prefix = $db->getPrefix();
-            $offset = ($archive->_currentPage - 1) * $archive->parameter->pageSize;
+            $options = \Widget\Options::alloc();
+            $pageSize = $options->customPageSize ? intval($options->customPageSize) : 10;
+            $archive->parameter->pageSize = $pageSize;
             
             $field = ($sort === 'views') ? 'views' : 'commentsNum';
             
-            $select = $db->select()
-                ->from('table.contents')
-                ->where('table.contents.status = ?', 'publish')
-                ->where('table.contents.type = ?', 'post')
-                ->where('table.contents.created <= ?', time())
-                ->order($field, Typecho_Db::SORT_DESC)
-                ->limit($archive->parameter->pageSize)
-                ->offset($offset);
-            
-            $archive->setCustomSql($select);
+            // Typecho Widget_Archive 通过 sort 和 direction 参数控制排序
+            $archive->parameter->sort = $field;
+            $archive->parameter->direction = Typecho_Db::SORT_DESC;
         }
     }
 }
